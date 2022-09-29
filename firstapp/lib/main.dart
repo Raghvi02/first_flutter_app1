@@ -1,310 +1,65 @@
-
 import 'package:flutter/material.dart';
 
-import 'buttons.dart';
-
-import 'package:math_expressions/math_expressions.dart';
-
-
 void main() {
-
-  runApp(MyApp());
+  runApp(MaterialApp(title: 'Tip Calculator', home: TipCalculator()));
 }
 
-
-class MyApp extends StatelessWidget {
-
-  @override
-
-  Widget build(BuildContext context) {
-
-    return MaterialApp(
-
-      debugShowCheckedModeBanner: false,
-
-      home: HomePage(),
-
-    ); // MaterialApp
-
-  }
-}
-
-
-class HomePage extends StatefulWidget {
-
-  @override
-
-  _HomePageState createState() => _HomePageState();
-}
-
-
-class _HomePageState extends State<HomePage> {
-
-  var userInput = '';
-
-  var answer = '';
-
-
-  // Array of button
-
-  final List<String> buttons = [
-
-    'C',
-
-    '+/-',
-
-    '%',
-
-    'DEL',
-
-    '7',
-
-    '8',
-
-    '9',
-
-    '/',
-
-    '4',
-
-    '5',
-
-    '6',
-
-    'x',
-
-    '1',
-
-    '2',
-
-    '3',
-
-    '-',
-
-    '0',
-
-    '.',
-
-    '=',
-
-    '+',
-
-  ];
-
+class TipCalculator extends StatelessWidget {
+  double billAmount = 0.0;
+  double tipPercentage = 0.0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-      appBar: new AppBar(
-
-        title: new Text("Calculator"),
-
-      ), //AppBar
-
-      backgroundColor: Colors.white38,
-
-      body: Column(
-
-        children: <Widget>[
-
-          Expanded(
-
-            child: Container(
-
-              child: Column(
-
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                  children: <Widget>[
-
-                    Container(
-
-                      padding: EdgeInsets.all(20),
-
-                      alignment: Alignment.centerRight,
-
-                      child: Text(
-
-                        userInput,
-
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-
-                      ),
-
-                    ),
-
-                    Container(
-
-                      padding: EdgeInsets.all(15),
-
-                      alignment: Alignment.centerRight,
-
-                      child: Text(
-
-                        answer,
-
-                        style: TextStyle(
-
-                            fontSize: 30,
-
-                            color: Colors.white,
-
-                            fontWeight: FontWeight.bold),
-
-                      ),
-
-                    )
-
-                  ]),
-
-            ),
-
-          ),
-
-          Expanded(
-
-            flex: 3,
-
-            child: Container(
-
-              child: GridView.builder(
-
-                  itemCount: buttons.length,
-
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-
-                      crossAxisCount: 4),
-
-                  itemBuilder: (BuildContext context, int index) {
-                    // Clear Button
-
-                    if (index == 0) {
-                      return MyButton(
-
-                        buttontapped: () {
-                          setState(() {
-                            userInput += buttons[index];
-                          });
-                        },
-
-                        buttonText: buttons[index],
-
-                        color: Colors.blue[50],
-
-                        textColor: Colors.black,
-
-                      );
-                    }
-
-                    // Delete Button
-
-                    else if (index == 3) {
-                      return MyButton(
-
-                        buttontapped: () {
-                          setState(() {
-                            userInput =
-
-                                userInput.substring(0, userInput.length - 1);
-                          });
-                        },
-
-                        buttonText: buttons[index],
-
-                        color: Colors.blue[50],
-
-                        textColor: Colors.black,
-
-                      );
-                    }
-
-                    // Equal_to Button
-
-                    else if (index == 18) {
-                      return MyButton(
-
-                        buttontapped: () {
-                          setState(() {
-                            equalPressed();
-                          });
-                        },
-
-                        buttonText: buttons[index],
-
-                        color: Colors.orange[700],
-
-                        textColor: Colors.white,
-
-                      );
-                    }
-
-
-                    //  other buttons
-
-                    else {
-                      return MyButton(
-
-                        buttontapped: () {
-                          setState(() {
-                            userInput += buttons[index];
-                          });
-                        },
-
-                        buttonText: buttons[index],
-
-                        color: isOperator(buttons[index])
-
-                            ? Colors.blueAccent
-
-                            : Colors.white,
-
-                        textColor: isOperator(buttons[index])
-
-                            ? Colors.white
-
-                            : Colors.black,
-
-                      );
-                    }
-                  }), // GridView.builder
-
-            ),
-
-          ),
-
-        ],
-
-      ),
-
+    // Create first input field
+    TextField billAmountField = TextField(
+      keyboardType: TextInputType.number,
+      onChanged: (String value) {
+        try {
+          billAmount = double.parse(value);
+        } catch (exception) {
+          billAmount = 0.0;
+        }
+      },
+      decoration: InputDecoration(labelText: "Bill amount(\$)"),
     );
-  }
 
+    // Create another input field
+    TextField tipPercentageField = TextField(
+        decoration: InputDecoration(labelText: "Tip %", hintText: "15"),
+        keyboardType: TextInputType.number,
+        onChanged: (String value) {
+          try {
+            tipPercentage = double.parse(value);
+          } catch (exception) {
+            tipPercentage = 0.0;
+          }
+        });
 
-  bool isOperator(String x) {
-    if (x == '/' || x == 'x' || x == '-' || x == '+' || x == '=') {
-      return true;
-    }
+    // Create button
+    ElevatedButton calculateButton = ElevatedButton(
+        child: Text("Calculate"),
+        onPressed: () {
+          // Calculate tip and total
+          double calculatedTip = billAmount * tipPercentage / 100.0;
+          double total = billAmount + calculatedTip;
 
-    return false;
-  }
+          // Generate dialog
+          AlertDialog dialog = AlertDialog(
+              content: Text("Tip: \$$calculatedTip \n"
+                  "Total: \$$total"));
 
-// function to calculate the input operation
+          // Show dialog
+          showDialog(context: context, builder: (BuildContext context) => dialog);
+        });
 
-  void equalPressed() {
-    String finaluserinput = userInput;
+    Container container = Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+            children: [billAmountField, tipPercentageField, calculateButton]));
 
-    finaluserinput = userInput.replaceAll('x', '*');
+    AppBar appBar = AppBar(title: Text("Tip Calculator"));
 
-
-    Parser p = Parser();
-
-    Expression exp = p.parse(finaluserinput);
-
-    ContextModel cm = ContextModel();
-
-    double eval = exp.evaluate(EvaluationType.REAL, cm);
-
-    answer = eval.toString();
+    Scaffold scaffold = Scaffold(appBar: appBar, body: container);
+    return scaffold;
   }
 }
